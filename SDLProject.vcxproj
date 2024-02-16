@@ -138,7 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="helper.cpp" />
-    <ClCompile Include="maintextures.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
