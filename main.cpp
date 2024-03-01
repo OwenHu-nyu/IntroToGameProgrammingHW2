@@ -14,10 +14,10 @@
 #include "ShaderProgram.h"
 #include "stb_image.h"
 
-// —— NEW STUFF —— //
+// â€”â€” NEW STUFF â€”â€” //
 #include <ctime>   //
 #include "cmath"   //
-// ——————————————— //
+// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” //
 
 const int WINDOW_WIDTH = 640,
 WINDOW_HEIGHT = 480;
@@ -35,10 +35,11 @@ VIEWPORT_HEIGHT = WINDOW_HEIGHT;
 
 const char  V_SHADER_PATH[] = "shaders/vertex_textured.glsl",
 F_SHADER_PATH[] = "shaders/fragment_textured.glsl",
-PLAYER_SPRITE_FILEPATH[] = "paddle.png",
+PIKA_SPRITE_FILEPATH[] = "pikachu.png",
+ROCKET_SPRITE_FILEPATH[] = "Meowth.png",
 BALL_SPRITE_FILEPATH[] = "ball.png",
-PIKACHU_WIN_FILEPATH[] = "ball.png",
-ROCKET_WIN_FILEPATH[] = "paddle.png";
+PIKACHU_WIN_FILEPATH[] = "pikawin.png",
+ROCKET_WIN_FILEPATH[] = "rocketwin.png";
 
 const float MILLISECONDS_IN_SECOND = 1000.0;
 const float MINIMUM_COLLISION_DISTANCE = 0.5f;
@@ -140,8 +141,12 @@ void initialise()
     g_view_matrix = glm::mat4(1.0f);
     g_projection_matrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
 
-    g_player_texture_id = load_texture(PLAYER_SPRITE_FILEPATH);
-    g_other_texture_id = load_texture(PLAYER_SPRITE_FILEPATH);
+    g_pika_win_matrix = glm::mat4(1.0f);
+    g_rocket_win_matrix = glm::mat4(1.0f);
+    g_rocket_win_matrix = glm::scale(g_rocket_win_matrix, glm::vec3(6.0f, 5.0f, 0.0f));
+    g_pika_win_matrix = glm::scale(g_pika_win_matrix, glm::vec3(6.0f, 6.0f, 0.0f));
+    g_player_texture_id = load_texture(PIKA_SPRITE_FILEPATH);
+    g_other_texture_id = load_texture(ROCKET_SPRITE_FILEPATH);
     g_ball_texture_id = load_texture(BALL_SPRITE_FILEPATH);
     g_pika_win_texture_id = load_texture(PIKACHU_WIN_FILEPATH);
     g_rocket_win_texture_id = load_texture(ROCKET_WIN_FILEPATH);
@@ -183,11 +188,13 @@ void process_input()
             case SDLK_q:
                 g_game_is_running = false;
                 break;
+            case SDLK_t:
+                IsSingleplayer = !IsSingleplayer;
+                break;
 
             default:
                 break;
             }
-
         default:
             break;
         }
@@ -203,9 +210,9 @@ void process_input()
     {
         g_player_movement.y = -1.0f;
     }
-    if (key_state[SDL_SCANCODE_T]) {
+    /*if (key_state[SDL_SCANCODE_T]) {
         IsSingleplayer = !IsSingleplayer;
-    }
+    }*/
     if (!IsSingleplayer) {
         std::cout << std::time(nullptr) << ": Multiplayer.\n";
         if (key_state[SDL_SCANCODE_UP])
@@ -231,15 +238,15 @@ void process_input()
 }
 
 
-// ————————————————————————— NEW STUFF ———————————————————————————— //
+// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” NEW STUFF â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” //
 bool check_collision(glm::vec3& player_position, glm::vec3& ball_position)  //
 {                                                                   //
-    // —————————————————  Distance Formula ———————————————————————— //
+    // â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”  Distance Formula â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” //
     float x_distance = fabs(player_position.x - ball_position.x) - 0.5f;
     float y_distance = fabs(player_position.y - ball_position.y) - 0.5f;
     return (x_distance < 0 && y_distance < 0);
 }
-// ———————————————————————————————————————————————————————————————— //
+// â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” //
 
 
 void update()
@@ -267,7 +274,7 @@ void update()
         if (g_ball_position.y <= -3.5 || g_ball_position.y >= 3.5) {
             g_ball_movement.y *= -1;
         }
-        // —————————————————————— NEW STUFF ——————————————————————— //
+        // â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” NEW STUFF â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€” //
         if (check_collision(g_player_position, g_ball_position) || check_collision(g_ball_position, g_other_position))   //
         {                                                           //
             g_ball_movement.x *= -1;    //
@@ -287,12 +294,7 @@ void update()
         g_player_movement = glm::vec3(0.0f);
         g_other_movement = glm::vec3(0.0f);
         g_ball_movement = glm::vec3(0.0f);
-        if (winner == "Pikachu") {
-            draw_object(g_pika_win_matrix, g_pika_win_texture_id);
-        }
-        if (winner == "Rocket") {
-            draw_object(g_rocket_win_matrix, g_rocket_win_texture_id);
-        }
+       
     }
 }
 
@@ -322,6 +324,12 @@ void render()
     draw_object(g_other_model_matrix, g_other_texture_id);
     draw_object(smol_ball_model_matrix, g_ball_texture_id);
 
+    if (winner == "Pikachu") {
+        draw_object(g_pika_win_matrix, g_pika_win_texture_id);
+    }
+    if (winner == "Rocket") {
+        draw_object(g_rocket_win_matrix, g_rocket_win_texture_id);
+    }
     glDisableVertexAttribArray(g_shader_program.get_position_attribute());
     glDisableVertexAttribArray(g_shader_program.get_tex_coordinate_attribute());
 
